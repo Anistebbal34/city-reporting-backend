@@ -1,0 +1,47 @@
+# === Maven ===
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# === Build directories (other tools) ===
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# === IntelliJ IDEA ===
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# === VS Code ===
+.vscode/
+
+# === NetBeans ===
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# === Eclipse / Spring Tool Suite (STS) ===
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# === Uploaded images, temp files ===
+uploads/
+
+# === Logs, system files ===
+*.log
+.DS_Store
+Thumbs.db
+# Spring Boot config
+/src/main/resources/application.properties
+/src/main/resources/application.yml
+
