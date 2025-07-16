@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 public class ReportService {
@@ -43,9 +41,6 @@ public class ReportService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private StreetRepository streetRepository;
 
     private boolean isImageProvided(MultipartFile file) {
         return file != null && !file.isEmpty();

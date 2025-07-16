@@ -34,18 +34,24 @@ public class StreetService {
     }
 
     // Create new street
-    public Street createStreet(String name, Long districtId) {
+    public StreetResponseDTO createStreet(String name, Long districtId) {
         District district = districtRepository.findById(districtId)
                 .orElseThrow(() -> new EntityNotFoundException("District not found"));
 
         Street street = new Street();
         street.setName(name);
         street.setDistrict(district);
-        return streetRepository.save(street);
+        Street saved = streetRepository.save(street);
+
+        return new StreetResponseDTO(
+                saved.getId(),
+                saved.getName(),
+                saved.getDistrict().getId(),
+                saved.getDistrict().getName());
     }
 
     // Update street
-    public Street updateStreet(Long streetId, String newName, Long newDistrictId) {
+    public StreetResponseDTO updateStreet(Long streetId, String newName, Long newDistrictId) {
         Street street = streetRepository.findById(streetId)
                 .orElseThrow(() -> new EntityNotFoundException("Street not found"));
 
@@ -59,7 +65,13 @@ public class StreetService {
             street.setDistrict(newDistrict);
         }
 
-        return streetRepository.save(street);
+        Street updated = streetRepository.save(street);
+
+        return new StreetResponseDTO(
+                updated.getId(),
+                updated.getName(),
+                updated.getDistrict().getId(),
+                updated.getDistrict().getName());
     }
 
     // Disable or remove street — optional

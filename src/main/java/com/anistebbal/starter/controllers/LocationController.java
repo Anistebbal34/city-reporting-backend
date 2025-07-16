@@ -4,8 +4,7 @@ import com.anistebbal.starter.dto.CreateOrUpdateDistrictDTO;
 import com.anistebbal.starter.dto.CreateOrUpdateStreetDTO;
 import com.anistebbal.starter.dto.DistrictResponseDTO;
 import com.anistebbal.starter.dto.StreetResponseDTO;
-import com.anistebbal.starter.entities.District;
-import com.anistebbal.starter.entities.Street;
+
 import com.anistebbal.starter.services.DistrictService;
 import com.anistebbal.starter.services.StreetService;
 import jakarta.validation.Valid;
@@ -34,17 +33,17 @@ public class LocationController {
 
     @PostMapping("/districts")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<District> createDistrict(@Valid @RequestBody CreateOrUpdateDistrictDTO dto) {
-        District district = districtService.createDistrict(dto.getName(), dto.getCityId());
+    public ResponseEntity<DistrictResponseDTO> createDistrict(@Valid @RequestBody CreateOrUpdateDistrictDTO dto) {
+        DistrictResponseDTO district = districtService.createDistrict(dto.getName(), dto.getCityId());
         return ResponseEntity.ok(district);
     }
 
     @PutMapping("/districts/{districtId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<District> updateDistrict(
+    public ResponseEntity<DistrictResponseDTO> updateDistrict(
             @PathVariable Long districtId,
             @Valid @RequestBody CreateOrUpdateDistrictDTO dto) {
-        District updated = districtService.updateDistrict(districtId, dto.getName(), dto.getCityId());
+        DistrictResponseDTO updated = districtService.updateDistrict(districtId, dto.getName(), dto.getCityId());
         return ResponseEntity.ok(updated);
     }
 
@@ -56,18 +55,18 @@ public class LocationController {
 
     @PostMapping("/streets")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Street> createStreet(@Valid @RequestBody CreateOrUpdateStreetDTO dto) {
-        Street street = streetService.createStreet(dto.getName(), dto.getDistrictId());
+    public ResponseEntity<StreetResponseDTO> createStreet(@Valid @RequestBody CreateOrUpdateStreetDTO dto) {
+        StreetResponseDTO street = streetService.createStreet(dto.getName(), dto.getDistrictId());
         return ResponseEntity.ok(street);
     }
 
     // 🟡 Update an existing street
     @PutMapping("/streets/{streetId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Street> updateStreet(
+    public ResponseEntity<StreetResponseDTO> updateStreet(
             @PathVariable Long streetId,
             @Valid @RequestBody CreateOrUpdateStreetDTO dto) {
-        Street updated = streetService.updateStreet(streetId, dto.getName(), dto.getDistrictId());
+        StreetResponseDTO updated = streetService.updateStreet(streetId, dto.getName(), dto.getDistrictId());
         return ResponseEntity.ok(updated);
     }
 }

@@ -15,10 +15,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.dao.DataIntegrityViolationException;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -72,7 +71,7 @@ public class UserService {
 
     // Update an existing user
 
-    public User updateUser(Long userId, RegisterUserDto dto) {
+    public UserResponseDto updateUser(Long userId, RegisterUserDto dto) {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
@@ -90,7 +89,15 @@ public class UserService {
         existingUser.setStreet(street);
 
         try {
-            return userRepository.save(existingUser);
+            User savedUser = userRepository.save(existingUser);
+
+            UserResponseDto response = new UserResponseDto();
+            response.setId(savedUser.getId());
+            response.setUsername(savedUser.getUsername());
+            response.setPhone(savedUser.getPhone());
+            response.setRole(savedUser.getRole());
+
+            return response;
         } catch (DataIntegrityViolationException ex) {
             String cause = ex.getRootCause() != null ? ex.getRootCause().getMessage() : "";
             String message = "Duplicate value";
@@ -114,24 +121,55 @@ public class UserService {
     }
 
     // Get users by street ID
-    public List<User> getUsersByStreetId(Long streetId) {
-        return userRepository.findByStreetId(streetId);
+    public List<UserResponseDto> getUsersByStreetId(Long streetId) {
+        List<User> users = userRepository.findByStreetId(streetId);
+
+        return users.stream().map(user -> {
+            UserResponseDto dto = new UserResponseDto();
+            dto.setId(user.getId());
+            dto.setUsername(user.getUsername());
+            dto.setPhone(user.getPhone());
+            dto.setRole(user.getRole());
+            return dto;
+        }).toList();
     }
 
-    // Get users by district ID (via street.district)
-    public List<User> getUsersByDistrictId(Long districtId) {
-        return userRepository.findByStreetDistrictId(districtId);
+    public List<UserResponseDto> getUsersByDistrictId(Long districtId) {
+        List<User> users = userRepository.findByStreetDistrictId(districtId);
+
+        return users.stream().map(user -> {
+            UserResponseDto dto = new UserResponseDto();
+            dto.setId(user.getId());
+            dto.setUsername(user.getUsername());
+            dto.setPhone(user.getPhone());
+            dto.setRole(user.getRole());
+            return dto;
+        }).toList();
     }
 
-    // Get all users
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+
+        return users.stream().map(user -> {
+            UserResponseDto dto = new UserResponseDto();
+            dto.setId(user.getId());
+            dto.setUsername(user.getUsername());
+            dto.setPhone(user.getPhone());
+            dto.setRole(user.getRole());
+            return dto;
+        }).toList();
     }
 
-    // Optional: Get a specific user
-    public User getUserById(Long userId) {
-        return userRepository.findById(userId)
+    public UserResponseDto getUserById(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+
+        UserResponseDto dto = new UserResponseDto();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setPhone(user.getPhone());
+        dto.setRole(user.getRole());
+        return dto;
     }
 
     public LoginResponseDto verify(LoginRequestDTO user) {

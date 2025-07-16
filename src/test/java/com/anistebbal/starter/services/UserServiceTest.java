@@ -124,14 +124,13 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        User updatedUser = userService.updateUser(userId, dto);
+        UserResponseDto updatedUser = userService.updateUser(userId, dto);
 
         // Assert
         assertEquals("updatedUser", updatedUser.getUsername());
         assertEquals("0777123456", updatedUser.getPhone());
         assertEquals("ADMIN", updatedUser.getRole());
-        assertEquals(newStreet, updatedUser.getStreet());
-        assertTrue(passwordEncoder.matches("newpass", updatedUser.getPassword()));
+
     }
 
 }

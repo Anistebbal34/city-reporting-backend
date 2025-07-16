@@ -2,7 +2,7 @@ package com.anistebbal.starter.controllers;
 
 import com.anistebbal.starter.dto.*;
 import com.anistebbal.starter.entities.Report;
-import com.anistebbal.starter.entities.ReportStatus;
+
 import com.anistebbal.starter.services.ReportService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.anistebbal.starter.config.UserPrincipal;
@@ -12,19 +12,16 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.time.LocalDate;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -65,7 +62,7 @@ public class ReportController {
     }
 
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('CITIZEN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ReportResponseDTO>> getReportsForAdmin(
             @ModelAttribute AdminReportFilterDTO filter) {
 
@@ -91,7 +88,7 @@ public class ReportController {
 
     @PreAuthorize("hasRole('ADMIN','CITIZEN')")
 
-    @PostMapping("/analytics")
+    @GetMapping("/analytics")
     public ResponseEntity<ReportAnalyticsDTO> getAnalytics(@Valid @RequestBody DateRangeDTO dateRange) {
         ReportAnalyticsDTO analytics = reportService.getReportAnalytics(
                 dateRange.getStartDate(), dateRange.getEndDate());
