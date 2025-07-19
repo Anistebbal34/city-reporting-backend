@@ -9,4 +9,4 @@ spring:
       ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
   jwt:
-    secret: test-secret
+    secret: c2VjcmV0LXRlc3QtbXVzdC1iZS1iYXNlNjQ=
