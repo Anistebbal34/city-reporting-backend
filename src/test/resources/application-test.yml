@@ -8,5 +8,6 @@ spring:
     hibernate:
       ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
-  jwt:
-    secret: c2VjcmV0LXRlc3QtbXVzdC1iZS1iYXNlNjQ=
+
+jwt:
+  secret: LxEThLgZKRdYhylBWzWGMqM+P3Of50d9EvNpU9Yy1Fs=
