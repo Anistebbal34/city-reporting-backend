@@ -41,35 +41,57 @@ public class UserService {
     @Autowired
     private StreetRepository streetRepository;
 
-    // Add a new user
-    public UserResponseDto registerUser(RegisterUserDto dto) {
-        Street street = streetRepository.findById(dto.getStreetId())
-                .orElseThrow(() -> new EntityNotFoundException("Street not found with ID: " + dto.getStreetId()));
-
-        User user = User.builder()
+    private User buildUserFromDto(RegisterUserDto dto, Street street) {
+        return User.builder()
                 .username(dto.getUsername())
                 .phone(dto.getPhone())
                 .password(encoder.encode(dto.getPassword()))
                 .role(dto.getRole())
                 .street(street)
                 .build();
+    }
+
+    private UserResponseDto mapToResponseDto(User user) {
+        return new UserResponseDto(user.getId(), user.getUsername(), user.getPhone(), user.getRole());
+    }
+
+    private String buildDuplicateErrorMessage(DataIntegrityViolationException ex, RegisterUserDto dto) {
+        String cause = ex.getRootCause() != null ? ex.getRootCause().getMessage() : "";
+        if (cause.contains("user_phone")) {
+            return "Phone number already taken: " + dto.getPhone();
+        } else if (cause.contains("user_username")) {
+            return "Username already taken: " + dto.getUsername();
+        }
+        return "Duplicate value";
+    }
+
+    // Add a new user
+    public UserResponseDto registerUser(RegisterUserDto dto) {
+        Street street = streetRepository.findById(dto.getStreetId())
+                .orElseThrow(() -> new EntityNotFoundException("Street not found with ID: " + dto.getStreetId()));
+
+        User user = buildUserFromDto(dto, street);
 
         try {
             User saved = userRepository.save(user);
-            return new UserResponseDto(saved.getId(), saved.getUsername(), saved.getPhone(), saved.getRole());
+            return mapToResponseDto(saved);
         } catch (DataIntegrityViolationException ex) {
-            String message = "Duplicate value";
-            String cause = ex.getRootCause() != null ? ex.getRootCause().getMessage() : "";
-            if (cause.contains("user_phone")) {
-                message = "Phone number already taken: " + dto.getPhone();
-            } else if (cause.contains("user_username")) {
-                message = "Username already taken: " + dto.getUsername();
-            }
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException(buildDuplicateErrorMessage(ex, dto));
         }
     }
 
     // Update an existing user
+
+    private void mapDtoToExistingUser(User user, RegisterUserDto dto, Street street) {
+        user.setUsername(dto.getUsername());
+        user.setPhone(dto.getPhone());
+        user.setRole(dto.getRole());
+        user.setStreet(street);
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(encoder.encode(dto.getPassword()));
+        }
+    }
 
     public UserResponseDto updateUser(Long userId, RegisterUserDto dto) {
         User existingUser = userRepository.findById(userId)
@@ -78,37 +100,14 @@ public class UserService {
         Street street = streetRepository.findById(dto.getStreetId())
                 .orElseThrow(() -> new EntityNotFoundException("Street not found with ID: " + dto.getStreetId()));
 
-        existingUser.setUsername(dto.getUsername());
-        existingUser.setPhone(dto.getPhone());
-        existingUser.setRole(dto.getRole());
-
-        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-            existingUser.setPassword(encoder.encode(dto.getPassword()));
-        }
-
-        existingUser.setStreet(street);
+        mapDtoToExistingUser(existingUser, dto, street);
 
         try {
             User savedUser = userRepository.save(existingUser);
 
-            UserResponseDto response = new UserResponseDto();
-            response.setId(savedUser.getId());
-            response.setUsername(savedUser.getUsername());
-            response.setPhone(savedUser.getPhone());
-            response.setRole(savedUser.getRole());
-
-            return response;
+            return mapToResponseDto(savedUser);
         } catch (DataIntegrityViolationException ex) {
-            String cause = ex.getRootCause() != null ? ex.getRootCause().getMessage() : "";
-            String message = "Duplicate value";
-
-            if (cause.contains("user_phone")) {
-                message = "Phone number already exists: " + dto.getPhone();
-            } else if (cause.contains("user_username")) {
-                message = "Username already exists: " + dto.getUsername();
-            }
-
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException(buildDuplicateErrorMessage(ex, dto));
         }
     }
 
@@ -124,52 +123,32 @@ public class UserService {
     public List<UserResponseDto> getUsersByStreetId(Long streetId) {
         List<User> users = userRepository.findByStreetId(streetId);
 
-        return users.stream().map(user -> {
-            UserResponseDto dto = new UserResponseDto();
-            dto.setId(user.getId());
-            dto.setUsername(user.getUsername());
-            dto.setPhone(user.getPhone());
-            dto.setRole(user.getRole());
-            return dto;
-        }).toList();
+        return users.stream()
+                .map(user -> this.mapToResponseDto(user))
+                .toList();
     }
 
     public List<UserResponseDto> getUsersByDistrictId(Long districtId) {
         List<User> users = userRepository.findByStreetDistrictId(districtId);
 
-        return users.stream().map(user -> {
-            UserResponseDto dto = new UserResponseDto();
-            dto.setId(user.getId());
-            dto.setUsername(user.getUsername());
-            dto.setPhone(user.getPhone());
-            dto.setRole(user.getRole());
-            return dto;
-        }).toList();
+        return users.stream()
+                .map(user -> this.mapToResponseDto(user))
+                .toList();
     }
 
     public List<UserResponseDto> getAllUsers() {
         List<User> users = userRepository.findAll();
 
-        return users.stream().map(user -> {
-            UserResponseDto dto = new UserResponseDto();
-            dto.setId(user.getId());
-            dto.setUsername(user.getUsername());
-            dto.setPhone(user.getPhone());
-            dto.setRole(user.getRole());
-            return dto;
-        }).toList();
+        return users.stream()
+                .map(user -> this.mapToResponseDto(user))
+                .toList();
     }
 
     public UserResponseDto getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
-        UserResponseDto dto = new UserResponseDto();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setPhone(user.getPhone());
-        dto.setRole(user.getRole());
-        return dto;
+        return this.mapToResponseDto(user);
     }
 
     public LoginResponseDto verify(LoginRequestDTO user) {

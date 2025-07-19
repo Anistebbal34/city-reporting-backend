@@ -4,6 +4,7 @@ import com.anistebbal.starter.dto.DistrictResponseDTO;
 import com.anistebbal.starter.dto.StreetResponseDTO;
 import com.anistebbal.starter.entities.City;
 import com.anistebbal.starter.entities.District;
+import com.anistebbal.starter.entities.Street;
 import com.anistebbal.starter.repositories.CityRepository;
 import com.anistebbal.starter.repositories.DistrictRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,30 +23,15 @@ public class DistrictService {
         @Autowired
         private CityRepository cityRepository;
 
-        // Get all districts by city
+        // ✅ Get all districts for a given city
         public List<DistrictResponseDTO> getDistrictDTOsByCity(Long cityId) {
                 return districtRepository.findByCityId(cityId)
                                 .stream()
-                                .map(district -> {
-                                        List<StreetResponseDTO> streetDTOs = district.getStreets()
-                                                        .stream()
-                                                        .map(street -> new StreetResponseDTO(
-                                                                        street.getId(),
-                                                                        street.getName(),
-                                                                        district.getId(),
-                                                                        district.getName()))
-                                                        .collect(Collectors.toList());
-
-                                        return new DistrictResponseDTO(
-                                                        district.getId(),
-                                                        district.getName(),
-                                                        district.getCity().getId(),
-                                                        district.getCity().getName(),
-                                                        streetDTOs);
-                                })
+                                .map(this::mapToDistrictDto)
                                 .collect(Collectors.toList());
         }
 
+        // ✅ Create new district
         public DistrictResponseDTO createDistrict(String name, Long cityId) {
                 City city = cityRepository.findById(cityId)
                                 .orElseThrow(() -> new EntityNotFoundException("City not found"));
@@ -53,16 +39,18 @@ public class DistrictService {
                 District district = new District();
                 district.setName(name);
                 district.setCity(city);
-                District saved = districtRepository.save(district);
 
+                District saved = districtRepository.save(district);
                 return new DistrictResponseDTO(
                                 saved.getId(),
                                 saved.getName(),
                                 city.getId(),
                                 city.getName(),
-                                List.of());
+                                List.of() // no streets yet
+                );
         }
 
+        // ✅ Update district name or city
         public DistrictResponseDTO updateDistrict(Long districtId, String newName, Long newCityId) {
                 District district = districtRepository.findById(districtId)
                                 .orElseThrow(() -> new EntityNotFoundException("District not found"));
@@ -72,37 +60,36 @@ public class DistrictService {
                 }
 
                 if (newCityId != null) {
-                        City city = cityRepository.findById(newCityId)
+                        City newCity = cityRepository.findById(newCityId)
                                         .orElseThrow(() -> new EntityNotFoundException("City not found"));
-                        district.setCity(city);
+                        district.setCity(newCity);
                 }
 
                 District updated = districtRepository.save(district);
+                return mapToDistrictDto(updated);
+        }
 
-                List<StreetResponseDTO> streets = updated.getStreets()
+        // ✅ Private helper: Convert Street -> StreetResponseDTO
+        private StreetResponseDTO mapToStreetDto(Street street, District district) {
+                return new StreetResponseDTO(
+                                street.getId(),
+                                street.getName(),
+                                district.getId(),
+                                district.getName());
+        }
+
+        // ✅ Private helper: Convert District -> DistrictResponseDTO
+        private DistrictResponseDTO mapToDistrictDto(District district) {
+                List<StreetResponseDTO> streetDtos = district.getStreets()
                                 .stream()
-                                .map(street -> new StreetResponseDTO(
-                                                street.getId(),
-                                                street.getName(),
-                                                updated.getId(),
-                                                updated.getName()))
+                                .map(street -> mapToStreetDto(street, district))
                                 .toList();
 
                 return new DistrictResponseDTO(
-                                updated.getId(),
-                                updated.getName(),
-                                updated.getCity().getId(),
-                                updated.getCity().getName(),
-                                streets);
+                                district.getId(),
+                                district.getName(),
+                                district.getCity().getId(),
+                                district.getCity().getName(),
+                                streetDtos);
         }
-
-        // Delete district — opti
-        /*
-         * public void deleteDistrict(Long districtId) {
-         * if (!districtRepository.existsById(districtId)) {
-         * throw new EntityNotFoundException("District not found");
-         * }
-         * districtRepository.deleteById(districtId);
-         * }
-         */
 }

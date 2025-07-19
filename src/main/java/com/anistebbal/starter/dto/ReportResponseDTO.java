@@ -3,7 +3,11 @@ package com.anistebbal.starter.dto;
 import com.anistebbal.starter.entities.ReportStatus;
 
 import java.time.LocalDate;
+import lombok.Builder;
+import lombok.Data;
 
+@Data
+@Builder
 public class ReportResponseDTO {
 
     private Long id;
