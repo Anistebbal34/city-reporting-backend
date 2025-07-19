@@ -1,4 +1,4 @@
-# City Issue Reporting System - MVP Backend
+# City Issue Reporting System
 
 This is the backend system for a structured issue reporting platform designed for my city.  
 It was proposed as a way to solve the problem of **unstructured citizen issue reports**, and the solution was **accepted as a pilot MVP**.
@@ -12,16 +12,31 @@ It was proposed as a way to solve the problem of **unstructured citizen issue re
 I was fully responsible for designing and implementing the **backend architecture**,  
 handling everything from database modeling and API design to unit testing and documentation.
 
+---
+
 ## Architecture
 
-The project follows a **Clean Architecture** style using:
+The project follows a **Clean Architecture** approach, which emphasizes clear separation of concerns.
 
-- **DTOs** for input/output validation and transformation
-- **Service Layer** for business logic
-- **Repository Layer** for data access
-- **Controller Layer** for handling HTTP requests
+- **Controller Layer** handles HTTP requests
+- **DTOs** are used for input/output validation and transformation
+- **Service Layer** contains core business logic
+- **Repository Layer** handles data persistence with Spring Data JPA
+- A **Logger** is used across layers to track key application behavior, monitor exceptions, and support debugging
 
-This ensures maintainability, testability, and separation of concerns.
+This structure improves maintainability, testability, and scalability.
+
+---
+
+## Continuous Integration (CI)
+
+A **GitHub Actions** workflow was added to run automated builds and tests on every push or pull request to the `main` branch.
+
+This ensures that:
+
+- Code is always tested before being merged
+- Bugs are caught early
+- The project is production-ready at all times
 
 ---
 
@@ -58,7 +73,7 @@ This ensures maintainability, testability, and separation of concerns.
 ## Future Improvements
 
 - Advanced image storage using cloud providers (e.g., AWS S3)
-- CI/CD pipeline setup for deployment
+- CD pipeline setup for deployment
 - More granular role-based access control
 - Other potential features as requested by city administration
 
