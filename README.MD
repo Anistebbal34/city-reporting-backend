@@ -32,11 +32,6 @@ This structure improves maintainability, testability, and scalability.
 
 A **GitHub Actions** workflow was added to run automated builds and tests on every push or pull request to the `main` branch.
 
-This ensures that:
-
-- Code is always tested before being merged
-- Bugs are caught early
-- The project is production-ready at all times
 
 ---
 
